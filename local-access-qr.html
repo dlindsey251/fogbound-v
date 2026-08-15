@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fogbound Local Access QR</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        background: #0b0f17;
+        color: #e7ebf3;
+      }
+      .card {
+        width: min(92vw, 560px);
+        border: 1px solid #243049;
+        border-radius: 16px;
+        padding: 20px;
+        background: #121a29;
+        text-align: center;
+      }
+      img {
+        width: min(78vw, 360px);
+        height: auto;
+        border-radius: 12px;
+        background: #fff;
+        padding: 10px;
+      }
+      code {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        background: #0c1320;
+        border: 1px solid #243049;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Scan To Open Fogbound</h1>
+      <img
+        alt="QR code for local Fogbound site"
+        src="https://api.qrserver.com/v1/create-qr-code/?size=720x720&data=http%3A%2F%2F10.0.0.86%3A5173"
+      />
+      <div><code>http://10.0.0.86:5173</code></div>
+    </main>
+  </body>
+</html>
