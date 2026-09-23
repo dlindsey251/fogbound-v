@@ -1,19 +1,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-/**
- * Global state store for the Fogbound experience.
- *
- * Persisted keys (localStorage): fragments, escapeTriggered, loopCount
- * Transient keys: targetNorm, currentNorm, depthSlowUntilTs, whispersOn, lowPower, activeOverlay, activeOverlaySource, whisperText, loopVeilVisible, entryOneFlashTick, pendingMenuPulseOverlay, menuAttentionTarget, secretCodePromptVisible, secretCodeSolved, storyTeaserTick
- */
+// Narrative progress is persisted; animation and open-panel state are not.
 const useGameStore = create(
   persist(
     (set) => ({
       // ── Depth navigation ─────────────────────────────────────────────────
-      // targetNorm: desired depth [0, 1], set by scroll or joystick
+      // Normalized target and rendered depth.
       targetNorm: 0,
-      // currentNorm: smoothed depth written by the RAF loop in World
       currentNorm: 0,
       depthSlowUntilTs: 0,
 
@@ -30,8 +24,6 @@ const useGameStore = create(
       escapeTriggered: false,
 
       // ── Collected fragments ───────────────────────────────────────────────
-      // ibit: Ibit's Fragment (depth 0.34)
-      // ben:  Ben's Story / PDF artifact (depth 0.74)
       fragments: {
         ibit: false,
         ben: false,
@@ -79,12 +71,10 @@ const useGameStore = create(
       collectFragment: (name) =>
         set((s) => ({ fragments: { ...s.fragments, [name]: true } })),
 
-      // Atomically mark a fragment collected and open its overlay — these
-      // two operations are always paired, so keeping them together avoids
-      // the two-call pattern at every call site.
+      // Collection and presentation are one user action.
       collectAndOpen: (name) =>
         set((s) => ({
-          // Queue a menu pulse only for first-time interaction with this artifact.
+          // Pulse the menu the first time an artifact is found.
           pendingMenuPulseOverlay: s.fragments[name] ? s.pendingMenuPulseOverlay : name,
           fragments: { ...s.fragments, [name]: true },
           activeOverlay: name,
@@ -130,8 +120,7 @@ const useGameStore = create(
       triggerEntryOneFlash: () =>
         set((s) => ({ entryOneFlashTick: s.entryOneFlashTick + 1 })),
 
-      // Local testing reset: clears narrative progress and transient scene state
-      // without changing global app code or server data (everything is local).
+      // Reset story state without changing saved preferences.
       resetForTesting: () =>
         set((s) => ({
           targetNorm: 0,
@@ -160,7 +149,6 @@ const useGameStore = create(
     }),
     {
       name: 'fogbound-state',
-      // Only persist narrative progress — not transient animation state
       partialize: (s) => ({
         fragments: s.fragments,
         escapeTriggered: s.escapeTriggered,
