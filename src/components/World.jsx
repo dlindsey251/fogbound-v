@@ -4,7 +4,6 @@ import Forest from './Forest';
 import FogLayer from './FogLayer';
 import Memory from './Memory';
 import Artifact from './Artifact';
-// ── Parallax layers — edit the files in src/layers/ to add PNGs ──────────────
 import DeepBackground  from '../layers/DeepBackground';
 import MidBackground   from '../layers/MidBackground';
 import NearFog         from '../layers/NearFog';
@@ -41,7 +40,7 @@ export default function World() {
   const collectAndOpen = useGameStore((s) => s.collectAndOpen);
   const setCurrentNorm = useGameStore((s) => s.setCurrentNorm);
 
-  // ── RAF depth engine ────────────────────────────────────────────────────
+  // Smooth the requested depth inside the render loop.
   useEffect(() => {
     const media = window.matchMedia('(max-width: 768px)');
     const onMediaChange = (e) => {
@@ -62,7 +61,7 @@ export default function World() {
         worldRef.current.style.transform = `translateZ(${normRef.current * MAX_TZ}px)`;
       }
 
-      // Keep lantern glow reacting to depth without touching its tuned x/y placement.
+      // Depth controls glow strength; CSS controls placement.
       const depth = Math.max(0, Math.min(1, normRef.current));
       const afterScene = localStorage.getItem('fogbound_bg_after') === '1';
       const glowScale = (isMobile ? 0.62 : 0.68) + depth * (isMobile ? 0.58 : 0.52);
@@ -71,7 +70,7 @@ export default function World() {
       rootStyle.setProperty('--lantern-depth-scale', glowScale.toFixed(3));
       rootStyle.setProperty('--lantern-glow-alpha', glowAlpha.toFixed(3));
 
-      // On mobile, cap store-write frequency to reduce jank.
+      // Limit mobile store writes to reduce frame drops.
       const now = performance.now();
       if (!isMobile) {
         setCurrentNorm(normRef.current);
@@ -100,7 +99,6 @@ export default function World() {
     };
   }, [setCurrentNorm]);
 
-  // ── Artifact handlers ───────────────────────────────────────────────────
   const handleIbit = () => {
     collectAndOpen('ibit');
     trackMetric('artifact_collect', { artifactId: 'ibit' });
@@ -110,41 +108,30 @@ export default function World() {
   return (
     <div id="world" ref={worldRef}>
 
-      {/* ── LAYER 0: Fixed forest background ─────────────────────────────── */}
       <Forest />
 
-      {/* ── LAYER 1: Deep Background  →  edit src/layers/DeepBackground.jsx  */}
       <DeepBackground />
 
-      {/* ── LAYER 2: Mid Background   →  edit src/layers/MidBackground.jsx   */}
       <MidBackground />
 
-      {/* ── Atmospheric fog overlays (CSS animated, no PNGs) ─────────────── */}
       <FogLayer layerClass="layer1" />
 
-      {/* ── LAYER 3: Near Fog         →  edit src/layers/NearFog.jsx         */}
       <NearFog />
 
       <FogLayer layerClass="layer2" />
 
-      {/* ── LAYER 4: Ground           →  edit src/layers/Ground.jsx          */}
       <Ground />
 
-      {/* ── LAYER 5: Scene            →  edit src/layers/Scene.jsx           */}
       <Scene />
 
-      {/* ── Ground path gradient & lantern (engine elements) ─────────────── */}
       <div className="foreground fg2" aria-hidden="true" />
       <div className="path"          aria-hidden="true" />
 
-      {/* ── LAYER 6: Near Foreground  →  edit src/layers/NearForeground.jsx  */}
       <NearForeground />
 
-      {/* ── Narrative text (depth-triggered) ─────────────────────────────── */}
       <Memory text="Down…" depth={0.20} className="intro" />
       <Memory text="The first lie was told out of love." depth={0.58} className="hook" />
 
-      {/* ── Collectible artifacts ─────────────────────────────────────────── */}
       <Artifact id="ibit" depth={0.62} type="fragment" onCollect={handleIbit} unlockLoop={IBIT_UNLOCK_LOOP} />
 
     </div>
